@@ -1,178 +1,190 @@
-/** layuiAdmin.std-v1.2.1 LPPL License By http://www.layui.com/admin/ */ ;
-layui.define(["laytpl", "layer"], function (e) {
-    var t = layui.jquery,
-        a = layui.laytpl,
-        n = layui.layer,
-        r = layui.setter,
-        o = (layui.device(), layui.hint()),
-        i = function (e) {
-            return new d(e)
+/** layuiAdmin.std-v1.2.1 LPPL License By http://www.layui.com/admin/ */;
+layui.define(["laytpl", "layer"], function (exports) {
+    var jquery = layui.jquery,
+        laytpl = layui.laytpl,
+        layer = layui.layer,
+        setter = layui.setter,
+        hint = (layui.device(), layui.hint()),
+        view = function (id) {
+            return new View(id)
         },
-        s = "LAY_app_body",
-        d = function (e) {
-            this.id = e, this.container = t("#" + (e || s))
+        lAYAppBodyStr = "LAY_app_body",
+        View = function (id) {
+            this.id = id, this.container = jquery("#" + (id || lAYAppBodyStr))
         };
-    i.loading = function (e) {
-        e.append(this.elemLoad = t('<i class="layui-anim layui-anim-rotate layui-anim-loop layui-icon layui-icon-loading layadmin-loading"></i>'))
-    }, i.removeLoad = function () {
+    view.loading = function (ele) {
+        ele.append(this.elemLoad = jquery('<i class="layui-anim layui-anim-rotate layui-anim-loop layui-icon layui-icon-loading layadmin-loading"></i>'))
+    }, view.removeLoad = function () {
         this.elemLoad && this.elemLoad.remove()
-    }, i.exit = function (e) {
-        layui.data(r.tableName, {
-            key: r.request.tokenName,
+    }, view.exit = function (callback) {
+        layui.data(setter.tableName, {
+            key: setter.request.tokenName,
             remove: !0
-        }), e && e()
-    }, i.req = function (e) {
-        var a = e.success,
-            n = (e.error, r.request),
-            o = r.response,
-            s = function () {
-                return r.debug ? "<br><cite>URL：</cite>" + e.url : ""
+        }), callback && callback()
+    }, view.req = function (options) {
+        var success = options.success,
+            setterRequest = (options.error, setter.request),
+            setterResponse = setter.response,
+            debugStr = function () {
+                return setter.debug ? "<br><cite>URL：</cite>" + options.url : ""
             };
-        if (e.data = e.data || {}, e.headers = e.headers || {}, n.tokenName) {
-            var d = "string" == typeof e.data ? JSON.parse(e.data) : e.data;
-            e.data[n.tokenName] = n.tokenName in d ? e.data[n.tokenName] : layui.data(r.tableName)[n.tokenName] || "", e.headers[n.tokenName] = n.tokenName in e.headers ? e.headers[n.tokenName] : layui.data(r.tableName)[n.tokenName] || ""
+        if (options.data = options.data || {}, options.headers = options.headers || {}, setterRequest.tokenName) {
+            var data = "string" == typeof options.data ? JSON.parse(options.data) : options.data;
+            options.data[setterRequest.tokenName] = setterRequest.tokenName in data ?
+                options.data[setterRequest.tokenName] : layui.data(setter.tableName)[setterRequest.tokenName] || ""
+            options.headers[setterRequest.tokenName] = setterRequest.tokenName in options.headers ?
+                options.headers[setterRequest.tokenName] : layui.data(setter.tableName)[setterRequest.tokenName] || ""
         }
-        return delete e.success, delete e.error, t.ajax(t.extend({
+        return delete options.success, delete options.error, jquery.ajax(jquery.extend({
             type: "get",
             dataType: "json",
-            success: function (t) {
-                var n = o.statusCode;
-                if (t[o.statusName] == n.ok) "function" == typeof e.done && e.done(t);
-                else if (t[o.statusName] == n.logout) i.exit();
+            success: function (res) {
+                var code = setterResponse.statusCode;
+                if (res[setterResponse.statusName] == code.ok) "function" == typeof options.done && options.done(res);
+                else if (res[setterResponse.statusName] == code.logout) view.exit();
                 else {
-                    var r = ["<cite>Error：</cite> " + (t[o.msgName] || "返回状态码异常"), s()].join("");
-                    i.error(r)
+                    var errorMsg = ["<cite>Error：</cite> " + (res[setterResponse.msgName] || "返回状态码异常"), debugStr()].join("");
+                    view.error(errorMsg)
                 }
-                "function" == typeof a && a(t)
+                "function" == typeof success && success(res)
             },
-            error: function (e, t) {
-                var a = ["请求异常，请重试<br><cite>错误信息：</cite>" + t, s()].join("");
-                i.error(a), "function" == typeof a && a(res)
+            error: function (res, error) {
+                var errorMsg = ["请求异常，请重试<br><cite>错误信息：</cite>" + error, debugStr()].join("");
+                view.error(errorMsg), "function" == typeof errorMsg && errorMsg(res)
             }
-        }, e))
-    }, i.popup = function (e) {
-        var a = e.success,
-            r = e.skin;
-        return delete e.success, delete e.skin, n.open(t.extend({
+        }, options))
+    }, view.popup = function (options) {
+        var success = options.success,
+            skin = options.skin;
+        return delete options.success, delete options.skin, layer.open(jquery.extend({
             type: 1,
             title: "提示",
             content: "",
             id: "LAY-system-view-popup",
-            skin: "layui-layer-admin" + (r ? " " + r : ""),
+            skin: "layui-layer-admin" + (skin ? " " + skin : ""),
             shadeClose: !0,
             closeBtn: !1,
-            success: function (e, r) {
-                var o = t('<i class="layui-icon" close>&#x1006;</i>');
-                e.append(o), o.on("click", function () {
-                    n.close(r)
-                }), "function" == typeof a && a.apply(this, arguments)
+            success: function (ele, index) {
+                var iconEle = jquery('<i class="layui-icon" close>&#x1006;</i>');
+                ele.append(iconEle), iconEle.on("click", function () {
+                    layer.close(index)
+                }), "function" == typeof success && success.apply(this, arguments)
             }
-        }, e))
-    }, i.error = function (e, a) {
-        return i.popup(t.extend({
-            content: e,
+        }, options))
+    }, view.error = function (content, options) {
+        return view.popup(jquery.extend({
+            content: content,
             maxWidth: 300,
             offset: "t",
             anim: 6,
             id: "LAY_adminError"
-        }, a))
-    }, d.prototype.render = function (e, a) {
-        var n = this;
+        }, options))
+    }, View.prototype.render = function (path, a) {
+        var vm = this;
         layui.router();
-        return e = r.views + e + r.engine, t("#" + s).children(".layadmin-loading").remove(), i.loading(n.container), t.ajax({
-            url: e,
-            type: "get",
-            dataType: "html",
-            data: {
-                v: layui.cache.version
-            },
-            success: function (e) {
-                e = "<div>" + e + "</div>";
-                var r = t(e).find("title"),
-                    o = r.text() || (e.match(/\<title\>([\s\S]*)\<\/title>/) || [])[1],
-                    s = {
-                        title: o,
-                        body: e
-                    };
-                r.remove(), n.params = a || {}, n.then && (n.then(s), delete n.then), n.parse(e), i.removeLoad(), n.done && (n.done(s), delete n.done)
-            },
-            error: function (e) {
-                return i.removeLoad(), n.render.isError ? i.error("请求视图文件异常，状态：" + e.status) : (404 === e.status ? n.render("template/tips/404") : n.render("template/tips/error"), void(n.render.isError = !0))
-            }
-        }), n
-    }, d.prototype.parse = function (e, n, r) {
-        var s = this,
-            d = "object" == typeof e,
-            l = d ? e : t(e),
-            u = d ? e : l.find("*[template]"),
-            c = function (e) {
-                var n = a(e.dataElem.html()),
-                    o = t.extend({
-                        params: p.params
-                    }, e.res);
-                e.dataElem.after(n.render(o)), "function" == typeof r && r();
+        return path = setter.views + path + setter.engine,
+            jquery("#" + lAYAppBodyStr).children(".layadmin-loading").remove(),
+            view.loading(vm.container),
+            jquery.ajax({
+                url: path,
+                type: "get",
+                dataType: "html",
+                data: {
+                    v: layui.cache.version
+                },
+                success: function (res) {
+                    res = "<div>" + res + "</div>";
+                    var titleEle = jquery(res).find("title"),
+                        title = titleEle.text() || (res.match(/\<title\>([\s\S]*)\<\/title>/) || [])[1],
+                        titleAndBody = {
+                            title: title,
+                            body: res
+                        };
+                    titleEle.remove(),
+                        vm.params = a || {},
+                        vm.then && (vm.then(titleAndBody),
+                            delete vm.then),
+                        vm.parse(res), view.removeLoad(),
+                        vm.done && (vm.done(titleAndBody),
+                            delete vm.done)
+                },
+                error: function (res) {
+                    return view.removeLoad(), vm.render.isError ? view.error("请求视图文件异常，状态：" + res.status) : (404 === res.status ? vm.render("template/tips/404") : vm.render("template/tips/error"), void (vm.render.isError = !0))
+                }
+            }), vm
+    }, View.prototype.parse = function (ele, type, callback) {
+        var vm = this,
+            isObjEle = "object" == typeof ele,
+            ele = jquery(ele),
+            templateEle = isObjEle ? ele : ele.find("*[template]"),
+            runScript = function (options) {
+                var result = laytpl(options.dataElem.html()),
+                    o = jquery.extend({
+                        params: routerHash.params
+                    }, options.res);
+                options.dataElem.after(result.render(o)), "function" == typeof callback && callback();
                 try {
-                    e.done && new Function("d", e.done)(o)
+                    options.done && new Function("d", options.done)(o)
                 } catch (i) {
-                    console.error(e.dataElem[0], "\n存在错误回调脚本\n\n", i)
+                    console.error(options.dataElem[0], "\n存在错误回调脚本\n\n", i)
                 }
             },
-            p = layui.router();
-        l.find("title").remove(), s.container[n ? "after" : "html"](l.children()), p.params = s.params || {};
-        for (var y = u.length; y > 0; y--) ! function () {
-            var e = u.eq(y - 1),
+            routerHash = layui.router();
+        ele.find("title").remove(), vm.container[type ? "after" : "html"](ele.children()), routerHash.params = vm.params || {};
+        for (var y = templateEle.length; y > 0; y--) ! function () {
+            var e = templateEle.eq(y - 1),
                 t = e.attr("lay-done") || e.attr("lay-then"),
-                n = a(e.attr("lay-url") || "").render(p),
-                r = a(e.attr("lay-data") || "").render(p),
-                s = a(e.attr("lay-headers") || "").render(p);
+                n = laytpl(e.attr("lay-url") || "").render(routerHash),
+                r = laytpl(e.attr("lay-data") || "").render(routerHash),
+                s = laytpl(e.attr("lay-headers") || "").render(routerHash);
             try {
                 r = new Function("return " + r + ";")()
             } catch (d) {
-                o.error("lay-data: " + d.message), r = {}
+                hint.error("lay-data: " + d.message), r = {}
             }
             try {
                 s = new Function("return " + s + ";")()
             } catch (d) {
-                o.error("lay-headers: " + d.message), s = s || {}
+                hint.error("lay-headers: " + d.message), s = s || {}
             }
-            n ? i.req({
+            n ? view.req({
                 type: e.attr("lay-type") || "get",
                 url: n,
                 data: r,
                 dataType: "json",
                 headers: s,
                 success: function (a) {
-                    c({
+                    runScript({
                         dataElem: e,
                         res: a,
                         done: t
                     })
                 }
-            }) : c({
+            }) : runScript({
                 dataElem: e,
                 done: t
             })
         }();
-        return s
-    }, d.prototype.autoRender = function (e, a) {
-        var n = this;
-        t(e || "body").find("*[template]").each(function (e, a) {
-            var r = t(this);
-            n.container = r, n.parse(r, "refresh")
+        return vm
+    }, View.prototype.autoRender = function (select, a) {
+        var vm = this;
+        jquery(select || "body").find("*[template]").each(function (index, ele) {
+            var target = jquery(this);
+            vm.container = target, vm.parse(target, "refresh")
         })
-    }, d.prototype.send = function (e, t) {
-        var n = a(e || this.container.html()).render(t || {});
-        return this.container.html(n), this
-    }, d.prototype.refresh = function (e) {
-        var t = this,
-            a = t.container.next(),
-            n = a.attr("lay-templateid");
-        return t.id != n ? t : (t.parse(t.container, "refresh", function () {
-            t.container.siblings('[lay-templateid="' + t.id + '"]:last').remove(), "function" == typeof e && e()
-        }), t)
-    }, d.prototype.then = function (e) {
+    }, View.prototype.send = function (template, data) {
+        var result = laytpl(template || this.container.html()).render(data || {});
+        return this.container.html(result), this
+    }, View.prototype.refresh = function (callback) {
+        var vm = this,
+            nextEle = vm.container.next(),
+            templateid = nextEle.attr("lay-templateid");
+        return vm.id != templateid ? vm : (vm.parse(vm.container, "refresh", function () {
+            vm.container.siblings('[lay-templateid="' + vm.id + '"]:last').remove(), "function" == typeof callback && callback()
+        }), vm)
+    }, View.prototype.then = function (e) {
         return this.then = e, this
-    }, d.prototype.done = function (e) {
+    }, View.prototype.done = function (e) {
         return this.done = e, this
-    }, e("view", i)
+    }, exports("view", view)
 });
