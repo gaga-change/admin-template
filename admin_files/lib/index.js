@@ -1,45 +1,56 @@
-/** layuiAdmin.std-v1.2.1 LPPL License By http://www.layui.com/admin/ */ ;
 layui.extend({
-    setter: "config",
-    admin: "lib/admin",
-    view: "lib/view"
-}).define(["setter", "admin"], function (a) {
-    var e = layui.setter,
-        i = layui.element,
-        n = layui.admin,
-        t = n.tabsPage,
-        d = layui.view,
-        l = function (a, d) {
-            var l, b = r("#LAY_app_tabsheader>li"),
-                y = a.replace(/(^http(s*):)|(\?[\s\S]*$)/g, "");
-            if (b.each(function (e) {
-                    var i = r(this),
-                        n = i.attr("lay-id");
-                    n === a && (l = !0, t.index = e)
-                }), d = d || "新标签页", e.pageTabs) l || (r(s).append(['<div class="layadmin-tabsbody-item layui-show">', '<iframe src="' + a + '" frameborder="0" class="layadmin-iframe"></iframe>', "</div>"].join("")), t.index = b.length, i.tabAdd(o, {
-                title: "<span>" + d + "</span>",
-                id: a,
-                attr: y
-            }));
-            else {
-                var u = n.tabsBody(n.tabsPage.index).find(".layadmin-iframe");
-                u[0].contentWindow.location.href = a
+    setter: "js/config",
+    admin: "js/lib/admin",
+    view: "js/lib/view"
+}).define(["setter", "admin"], function (exports) {
+    var setter = layui.setter,
+        element = layui.element,
+        admin = layui.admin,
+        tabsPage = admin.tabsPage,
+        view = layui.view,
+        layAppBody = "#LAY_app_body",
+        layadminLayoutTabs = "layadmin-layout-tabs",
+        $ = layui.$;
+    var openTabsPage = function (url, title) {
+        var already, liEleS = $("#LAY_app_tabsheader>li"),
+            simpleUrl = url.replace(/(^http(s*):)|(\?[\s\S]*$)/g, "");
+        if (liEleS.each(function (index) {
+                var li = $(this),
+                    id = li.attr("lay-id");
+                id === url && (already = !0, tabsPage.index = index)
+            }), title = title || "新标签页", setter.pageTabs) {
+            if (!already) {
+                $(layAppBody).append(
+                    ['<div class="layadmin-tabsbody-item layui-show">',
+                        '<iframe src="' + url + '" frameborder="0" class="layadmin-iframe"></iframe>', "</div>"
+                    ].join(""))
+                tabsPage.index = liEleS.length
+                element.tabAdd(layadminLayoutTabs, {
+                    title: "<span>" + title + "</span>",
+                    id: url,
+                    attr: simpleUrl
+                })
             }
-            i.tabChange(o, a), n.tabsBodyChange(t.index, {
-                url: a,
-                text: d
-            })
-        },
-        s = "#LAY_app_body",
-        o = "layadmin-layout-tabs",
-        r = layui.$;
-    r(window);
-    n.screen() < 2 && n.sideFlexible(), layui.config({
-        base: e.base + "modules/"
-    }), layui.each(e.extend, function (a, i) {
-        var n = {};
-        n[i] = "{/}" + e.base + "lib/extend/" + i, layui.extend(n)
-    }), d().autoRender(), layui.use("common"), a("index", {
-        openTabsPage: l
+        } else {
+            var iframe = admin.tabsBody(admin.tabsPage.index).find(".layadmin-iframe");
+            iframe[0].contentWindow.location.href = url
+        }
+        element.tabChange(layadminLayoutTabs, url), admin.tabsBodyChange(tabsPage.index, {
+            url: url,
+            text: title
+        })
+    }
+    // $(window);
+    admin.screen() < 2 && admin.sideFlexible(), layui.config({
+        base: setter.base + "js/modules/"
     })
-});
+    layui.each(setter.extend, function (index, name) {
+        var obj = {};
+        obj[name] = "{/}" + setter.base + "lib/extend/" + name, layui.extend(obj)
+    })
+    view().autoRender()
+    layui.use("common")
+    exports("index", {
+        openTabsPage: openTabsPage
+    })
+})
