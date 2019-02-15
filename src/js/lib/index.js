@@ -1,3 +1,4 @@
+// 入口js 文件
 layui.extend({
     setter: "js/config",
     admin: "js/lib/admin",
